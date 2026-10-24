@@ -1,0 +1,78 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ---- Terraform ----
+# Never commit state: it can contain secret material in plaintext.
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl.bak
+crash.log
+*.tfvars
+!*.tfvars.example
+override.tf
+override.tf.json
+# Saved plan files are environment-specific and may embed sensitive values.
+tfplan
+*.tfplan
+# Stray state-lock artifact (contains machine/user + state path).
+lock.json
+# NOTE: .terraform.lock.hcl (the provider dependency lock) is intentionally
+# NOT ignored — it should be committed for reproducible provider versions.
+
+# ---- Lambda build artifacts ----
+lambda/**/build/
+lambda/**/*.zip
+# Terraform Lambda packaging dir: ignore vendored contents but keep the empty
+# dir (via its .gitkeep) so `terraform validate` resolves the archive path on a
+# fresh clone. Order matters: allow descent into the dirs, ignore everything
+# inside package/, then re-include only .gitkeep.
+!terraform/modules/rotation-lambda/build/
+!terraform/modules/rotation-lambda/build/package/
+terraform/modules/rotation-lambda/build/package/*
+!terraform/modules/rotation-lambda/build/package/.gitkeep
+
+# ---- Kubernetes ----
+# Never commit populated Secret manifests.
+kubernetes/**/*secret*.generated.yaml
+kubeconfig
+*.kubeconfig
+
+# ---- Secrets / credentials (defense in depth) ----
+*.pem
+*.key
+*.p12
+*.pfx
+# Allow the demo CA/cert that scripts generate into a gitignored dir only.
+certs/
+!certs/.gitkeep
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ---- Agent / scratch artifacts ----
+# Agent task reports, plans, and reviews: local working notes, not project
+# source. They also tend to capture environment-specific facts (account IDs,
+# cluster names), so keep them out of version control.
+.agents/
+my.md
+docs/story.md
+docs/portfolio-summary.md

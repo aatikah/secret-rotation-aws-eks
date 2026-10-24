@@ -1,0 +1,47 @@
+# Copy to terraform.tfvars and adjust. terraform.tfvars is gitignored.
+# NO secret VALUES belong here — only configuration.
+
+aws_region             = "us-east-1"
+environment            = "dev"
+app_name               = "myapp"
+owner_tag              = "team-platform"
+rotation_interval_days = 30
+log_level              = "INFO"
+log_retention_days     = 90
+
+# Lambda package built by: python scripts/build_lambda.py
+lambda_package_dir = "../../modules/rotation-lambda/build/package"
+
+# ---- Database (RDS PostgreSQL) ----
+# true provisions a private, non-public RDS instance for rotation testing.
+# Set it false only if you are deploying the secrets/Lambda/monitoring layer on
+# its own (e.g. to attach an existing database later).
+create_database = true
+
+# ---- Networking: choose ONE source (A or B) ----
+
+# Source A (recommended): read the network bootstrap environment's state.
+# Apply terraform/environments/network FIRST, then leave these as-is for local
+# state, or point at your S3 state.
+use_network_remote_state = true
+network_state_backend    = "local"
+network_state_config     = { path = "../network/terraform.tfstate" }
+# For S3 remote state instead:
+# network_state_backend = "s3"
+# network_state_config  = { bucket = "my-tfstate", key = "secrets-rotation/network/terraform.tfstate", region = "us-east-1" }
+
+# Source B: bring your own VPC. Set use_network_remote_state = false above and
+# uncomment these with your existing ids.
+# use_network_remote_state = false
+# vpc_id             = "vpc-xxxxxxxx"
+# private_subnet_ids = ["subnet-aaaa", "subnet-bbbb"]
+
+# db_host is wired automatically from the RDS endpoint when create_database =
+# true. Set it only if create_database = false and you are attaching an existing
+# database (its endpoint).
+# db_host = "mydb.abc123.us-east-1.rds.amazonaws.com"
+db_port = 5432
+db_name = "appdb"
+
+# Optional SNS topics to notify on alarms:
+# alarm_sns_topic_arns = ["arn:aws:sns:us-east-1:111122223333:rotation-alerts"]

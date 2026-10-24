@@ -1,0 +1,84 @@
+# Sample application that consumes the ESO-synced Kubernetes Secret.
+#
+# It demonstrates the two ways an app sees a rotated value:
+#
+#   1. Environment variables (envFrom secretRef): captured at container start.
+#      A rotation that updates the Secret does NOT change the env of an
+#      already-running process — the pod must be restarted. This is the key
+#      caveat the project calls out.
+#
+#   2. Projected volume: the Secret is mounted as files. The kubelet updates the
+#      mounted files when the Secret changes (within the sync period), so an app
+#      that RE-READS the files picks up the new value without a restart.
+#
+# To force a restart on change, use a reloader (e.g. stakater/reloader) keyed on
+# the Secret, or roll the Deployment. The annotation below opts this Deployment
+# into stakater/reloader if it is installed.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  namespace: myapp
+  labels:
+    app: myapp
+  annotations:
+    # If stakater/reloader is installed, it restarts this Deployment when the
+    # referenced Secret changes — demonstrating the restart strategy.
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      serviceAccountName: myapp-secrets
+      containers:
+        - name: app
+          # A tiny, dependency-free demo container: prints which DB user it is
+          # configured with (NEVER the password) every 15s from the mounted
+          # file, so you can watch it pick up a rotated username live.
+          image: busybox:1.36
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "sample app started";
+              while true; do
+                if [ -f /secrets/DB_USERNAME ]; then
+                  echo "[app] configured DB user: $(cat /secrets/DB_USERNAME) (password hidden)";
+                else
+                  echo "[app] waiting for secret volume...";
+                fi
+                sleep 15;
+              done
+          # (1) env vars captured at start — demonstrates the restart caveat.
+          envFrom:
+            - secretRef:
+                name: myapp-database
+          # (2) projected volume — files update on refresh without a restart.
+          volumeMounts:
+            - name: db-secret
+              mountPath: /secrets
+              readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: db-secret
+          secret:
+            secretName: myapp-database

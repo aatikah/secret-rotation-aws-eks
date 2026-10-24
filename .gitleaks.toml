@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow intentional fake PEM private key fixture in redaction unit test"
+paths = [
+    '''tests/unit/test_logging_redaction\.py$'''
+]

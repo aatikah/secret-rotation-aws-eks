@@ -1,0 +1,55 @@
+# Copy to terraform.tfvars and adjust. terraform.tfvars is gitignored.
+# NO secret VALUES belong here — only configuration.
+#
+# EKS is chargeable (control plane ~$0.10/hr + the node group below). Review
+# ../../../docs/costs.md before `terraform apply`.
+
+aws_region  = "us-east-1" # pinned: this stack is us-east-1 only
+environment = "dev"
+app_name    = "myapp"
+owner_tag   = "team-platform"
+
+# ---- Cluster ----
+cluster_version = "1.31"
+
+# ---- Managed node group (user default: 2 x t3.medium on-demand) ----
+node_instance_type = "t3.medium"
+node_desired_size  = 2
+node_min_size      = 1
+node_max_size      = 3
+node_capacity_type = "ON_DEMAND"
+
+# Cheaper single-node recipe for a disposable demo:
+# node_instance_type = "t3.small"
+# node_desired_size  = 1
+# node_min_size      = 1
+# node_max_size      = 1
+
+# ---- External Secrets Operator ----
+# ESO pulls its default public chart images over the VPC's NAT gateway — no
+# ECR mirror or image tag override is needed.
+eso_chart_version = "0.16.2"
+
+# ---- Networking: choose ONE source (A or B) ----
+
+# Source A (default): read the network bootstrap environment's state.
+# IMPORTANT — this default DIVERGES from the dev environment. dev defaults to
+# LOCAL network state; this env defaults to S3 (it is more likely to run from
+# CI / a second workstation without the network env's local state on disk).
+use_network_remote_state = true
+network_state_backend    = "s3"
+network_state_config = {
+  bucket = "dev-tech-state-bucket-net"
+  key    = "secrets-rotation/network/terraform.tfstate"
+  region = "us-east-1"
+}
+
+# If the network env was applied with LOCAL state (dev's default), use instead:
+# network_state_backend = "local"
+# network_state_config  = { path = "../network/terraform.tfstate" }
+
+# Source B: bring your own VPC. Set use_network_remote_state = false and
+# uncomment these with your existing ids (private subnets, 2+ AZs).
+# use_network_remote_state = false
+# vpc_id             = "vpc-xxxxxxxx"
+# private_subnet_ids = ["subnet-aaaa", "subnet-bbbb"]

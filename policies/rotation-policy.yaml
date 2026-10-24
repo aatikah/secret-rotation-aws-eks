@@ -1,0 +1,18 @@
+# Rotation policy thresholds. These are intentionally configurable so dev and
+# prod can enforce different rules without code changes.
+
+# Maximum allowed rotation interval. A secret configured to rotate less often
+# than this (or not at all) is a violation.
+max_rotation_interval_days: 90
+
+# Warn/fail when a TLS certificate is within this many days of expiry.
+cert_expiry_warning_days: 30
+
+# Tags every secret must carry for ownership and lifecycle management.
+# NOTE: tags carry metadata only — never credentials.
+required_tags:
+  - owner
+  - environment
+
+# Whether a configured rotation schedule is mandatory.
+require_rotation_enabled: true

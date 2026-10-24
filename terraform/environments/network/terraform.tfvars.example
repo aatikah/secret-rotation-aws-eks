@@ -1,0 +1,13 @@
+# Copy to terraform.tfvars and adjust. terraform.tfvars is gitignored.
+
+aws_region  = "us-east-1"
+environment = "dev"
+app_name    = "myapp"
+owner_tag   = "team-platform"
+
+vpc_cidr           = "10.20.0.0/16"
+availability_zones = ["us-east-1a", "us-east-1b"]
+
+# A single NAT gateway is the default egress path: the rotation Lambda and EKS
+# worker nodes reach public AWS APIs and registries over NAT (~$32/month).
+enable_nat = true

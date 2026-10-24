@@ -1,0 +1,7 @@
+# Runtime dependencies bundled into the rotation Lambda zip.
+# boto3/botocore are provided by the Lambda Python runtime, so they are NOT
+# pinned here to avoid version skew with the runtime. psycopg must be bundled.
+#
+# Use the manylinux binary wheel so the build works for the Lambda x86_64
+# runtime even when packaged on Windows/macOS (see the packaging script).
+psycopg[binary]==3.2.3

@@ -1,0 +1,17 @@
+# Namespaces for the demo. Keeping the operator, the secret store, and the
+# application in a clear namespace layout supports RBAC and blast-radius
+# isolation.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: external-secrets
+  labels:
+    app.kubernetes.io/part-of: secrets-rotation-platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: myapp
+  labels:
+    app.kubernetes.io/part-of: secrets-rotation-platform
+    # Example of a namespace boundary the application lives behind.

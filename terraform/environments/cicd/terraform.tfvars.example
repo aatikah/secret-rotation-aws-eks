@@ -1,0 +1,28 @@
+# Copy to terraform.tfvars and fill in your GitHub repo. Only github_org and
+# github_repo are required; the rest have working defaults.
+
+# ---- REQUIRED: the repo the deploy role will trust ----
+github_org  = "your-github-username-or-org"
+github_repo = "aws-secrets-rotation-platform"
+
+github_owner_id = "your_github_owner_id"
+github_repo_id  = "your_github_repo_id"
+
+# ---- Optional overrides (defaults shown) ----
+# aws_region  = "us-east-1"
+# environment = "dev"
+# app_name    = "myapp"
+# owner_tag   = "team-platform"
+
+# Refs allowed to assume the role. deploy-dev runs on workflow_dispatch, so this
+# must include the branch you dispatch the workflow from.
+# allowed_refs = ["refs/heads/main"]
+
+# If your AWS account ALREADY has a GitHub Actions OIDC provider (only one is
+# allowed per account), reuse it instead of creating a second one:
+# create_oidc_provider       = false
+# existing_oidc_provider_arn = "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
+
+# State buckets the deploy role may touch (defaults match the dev/network backends):
+# dev_state_bucket     = "dev-tech-state-bucket"
+# network_state_bucket = "dev-tech-state-bucket-net"
